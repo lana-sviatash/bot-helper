@@ -101,7 +101,7 @@ def main():
     while True:
         user_input = input('>>> ').lower()
         if user_input == 'hello':
-            print("How can I help you?")
+            print("How can I help you?\n command:\n add <name> <phone> \n change <name> <phone> \n phone <name> \n show all \n del <name>" )
         elif user_input in ('good bye', "close", "exit"):
             if os.path.exists("contacts.txt") and os.path.getsize("contacts.txt") == 0:
                 os.remove("contacts.txt")

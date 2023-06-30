@@ -60,4 +60,4 @@ if __name__=='__main__':
     'show all': [show_contacts, 'To show all contacts']
     }
 
-    print(hello_instuction(command_dict))
+    print(hello_instruction(command_dict))

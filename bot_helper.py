@@ -28,14 +28,16 @@ def input_errors(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (TypeError, KeyError, ValueError, IndexError) as e:
+        except (KeyError, ValueError) as e:
             error_message = str(e).split(':')[1]
             return f"Give me {error_message}"
+        except (IndexError, TypeError) as e:
+            return 'Instruction is not correct. You can type "hello" to see correct instruction'
     return wrapper
 
 
 @input_errors
-def adding_contact(name: str, phone: str, *args):
+def adding_contact(name: str, phone: str):
     name = Name(name.capitalize())
     
     try:
@@ -59,7 +61,7 @@ def adding_contact(name: str, phone: str, *args):
 
 
 @input_errors
-def changing_contact(name: str, phone: str, *args):
+def changing_contact(name: str, phone: str):
     name = Name(name.capitalize())
     phone = Phone(phone)
     if name.value in address_book.data:
@@ -75,8 +77,7 @@ def changing_contact(name: str, phone: str, *args):
         return f'Contact {name} does not exist'
 
 
-
-def save_contacts_to_file(*args):
+def save_contacts_to_file():
     with open("contacts.txt", "w") as file:
         for name, record in address_book.data.items():
                 phones = ", ".join(str(phone) for phone in record.phones)
@@ -84,7 +85,7 @@ def save_contacts_to_file(*args):
 
 
 @input_errors
-def phone(name: str, *args):
+def phone(name: str):
     name = Name(name.capitalize())
     record = address_book.data.get(name.value)
     if record is not None:
@@ -100,7 +101,7 @@ def show_contacts(*args):
 
 
 @input_errors
-def delete_contact(name: str, *args):
+def delete_contact(name: str):
     name = Name(name.capitalize())
     record = Record(name)
     try:

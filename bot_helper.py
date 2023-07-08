@@ -202,7 +202,7 @@ class Bot:
             return f'No record found for {name.value}'
 
     command_dict = {
-        'add': [adding_contact, 'add contact name'],
+        'add': [adding_contact, 'add contact name or name and phone'],
         'phone': [adding_contact_phone, 'add phone to existing contact'],
         'change name': [changing_contact_name, 'change existing name of the contact'],
         'change phone': [changing_contact_phone, 'change existing phone of the contact'],

@@ -28,11 +28,13 @@ def input_errors(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (KeyError, ValueError) as e:
-            error_message = str(e).split(':')[1]
-            return f"Give me {error_message}"
-        except (IndexError, TypeError) as e:
-            return 'Instruction is not correct. You can type "hello" to see correct instruction'
+        except (KeyError, ValueError, IndexError,TypeError) as e:
+            if "takes" in str(e) and "but" in str(e):
+                error_message = "Too many arguments provided"
+                return error_message
+            else:
+                error_message = str(e).split(':')[1]
+                return f"Give me {error_message}"
     return wrapper
 
 

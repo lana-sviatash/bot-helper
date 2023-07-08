@@ -111,12 +111,15 @@ class Bot:
             new_record = Record(new_name, phone=old_record.phones)
             try:
                 self.address_book.change_record_name(old_record, new_record)
+                old_record.name = new_name
                 self.save_contacts_to_file()
                 return 'Contact changed successfully'
             except NameError as e:
                 return str(e)
         else:
             return f"No record found for {old_name.value}"
+
+
 
     @input_errors
     def changing_contact_phone(self, name: str, old_phone: str, new_phone: str):

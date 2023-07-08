@@ -86,7 +86,7 @@ class AddressBook(UserDict):
             raise NameError(f'Record with name {record.name.value} not found in the address book.')
     
     def change_record_name(self, old_record:Record, new_record:Record):
-        if old_record.name.value in self.data:
+        if str(old_record.name) in self.data:
             self.data[new_record.name.value] = self.data.pop(old_record.name.value)
         else:
             raise NameError(f'Record with name {old_record.name.value} not found in the address book.')

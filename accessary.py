@@ -24,7 +24,7 @@ def hello_instruction (command_dict):
         if 'args' in parameters or 'kwargs' in parameters:
             result.append(f'{func_name} --> {func[1]}')
         else:
-            result.append(f'{func_name} {param_names[4:]} --> {func[1]}')
+            result.append(f'{func_name} [{param_names}]--> {func[1]}')
 
     rows_command = ''
     for command in result:

@@ -40,7 +40,6 @@ class Bot:
                 return f"Give me {error_message}"
         return wrapper
 
-    
     @input_errors
     def adding_contact(self, name:str, phone=None):
         try:
@@ -58,8 +57,6 @@ class Bot:
             record = Record(name.check_name(name.value))
             record.add_phone(phone.check_phone(phone.value))
         else:
-        
-        # record = Record(name.check_name(name.value), phone)
             record = Record(name.check_name(name.value))
         self.address_book.data[record.name] = record
         self.save_contacts_to_file()
@@ -119,8 +116,6 @@ class Bot:
         else:
             return f"No record found for {old_name.value}"
 
-
-
     @input_errors
     def changing_contact_phone(self, name: str, old_phone: str, new_phone: str):
         name = Name(name.capitalize())
@@ -164,7 +159,6 @@ class Bot:
             return result
         except NameError as e:
             return str(e)
-
 
     def show_book(self):
         return self.address_book.show_records()

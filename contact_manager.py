@@ -4,6 +4,7 @@ from collections import UserDict
 class PhoneError(Exception):
     pass
 
+
 class NameError(Exception):
     pass
 
@@ -12,7 +13,6 @@ class Field:
     def __init__(self, value):
         self.value = value
         
-
 
 class Name(Field):
     def check_name(self, name:str):
@@ -24,7 +24,6 @@ class Name(Field):
     
     def __str__(self):
         return self.value
-
 
 
 class Phone(Field):

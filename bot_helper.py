@@ -3,7 +3,7 @@ import functools
 import os
 
 from accessary import welcome_message, hello_instruction, parser_input
-from contact_manager import AddressBook, Record, Name, Phone, PhoneError
+from contact_manager import AddressBook, Record, Name, Phone, BirthDay, PhoneError, BirthDayError
 
 
 address_book = AddressBook()
@@ -15,12 +15,23 @@ def load_contacts_from_file():
             for line in file:
                 line = line.strip()
                 if line:
-                    name, phones = line.split(':')
+                    name, phones, birthday = line.split('|')
                     record = Record(Name(name.strip()))
-                    for phone in phones.strip().split(','):
-                            phone = Phone(phone.strip())
-                            record.add_phone(phone)
+                    if phones != 'No records':
+                        for phone in phones.replace('Phones:', '').strip().split(','):
+                                phone = Phone(phone.strip())
+                                record.add_phone(phone)
+                    if birthday.replace('Birthday:', '').strip():
+                        record.birthday = BirthDay((birthday.replace('Birthday:', '')).strip())
                     address_book.add_record(record)
+
+
+def save_contacts_to_file():
+    with open("contacts.txt", "w") as file:
+            for record in address_book.values():
+                phones = ', '.join(str(phone) for phone in record.phones)
+                birthday = str(record.birthday.value) if record.birthday else ""
+                file.write(f"{record.name.value} | Phones: {phones} | Birthday: {birthday}\n")
 
 
 def input_errors(func):
@@ -43,55 +54,43 @@ def adding_contact(name: str, phone: str):
     name = Name(name.capitalize())
     
     try:
-        name.check_name(name.value)
-    except NameError as e:
-        return e
-    
-    phone = Phone(phone)
-    try:
-        phone.check_phone(phone.value)
+        phone = Phone(phone)
     except PhoneError as e:
-        return e
+        return str(e)
     
     if name.value in address_book.data:
         return f"A record with the name '{name.value}' already exists."
     
-    record = Record(name, phone.check_phone(phone.value))
+    record = Record(name, phone.value)
     address_book.add_record(record)
     save_contacts_to_file()
     return 'Contact added successfully'
 
 
 @input_errors
-def changing_contact(name: str, phone: str):
+def changing_contact(name: str, old_phone: str, new_phone:str):
     name = Name(name.capitalize())
-    phone = Phone(phone)
+    
     if name.value in address_book.data:
         try:
-            phone.check_phone(phone.value)
+            old_phone = Phone(old_phone)
+            new_phone = Phone(new_phone)
         except PhoneError as e:
-            return e
-        record = Record(name, phone.check_phone(phone.value))
-        address_book.add_record(record)
+            return str(e)
+        record:Record = address_book.data[name.value]
+        record.change_phone(old_phone, new_phone)
         save_contacts_to_file()
         return 'Contact changed successfully'
     else:
         return f'Contact {name} does not exist'
 
 
-def save_contacts_to_file():
-    with open("contacts.txt", "w") as file:
-        for name, record in address_book.data.items():
-                phones = ", ".join(str(phone) for phone in record.phones)
-                file.write(f"{name}: {phones}\n")
-
-
 @input_errors
 def phone(name: str):
     name = Name(name.capitalize())
-    record = address_book.data.get(name.value)
+    record:Record = address_book.data.get(name.value)
     if record is not None:
-        return str(record)
+        return f'{record.name}: {", ".join(phone.value for phone in record.phones)}'
     else:
         return 'Contact not found'
 
@@ -99,19 +98,48 @@ def phone(name: str):
 def show_contacts(*args):
     if not address_book:
         return 'No contacts'
-    return address_book.show_records()
+    return address_book.print_part_records()
 
 
 @input_errors
 def delete_contact(name: str):
     name = Name(name.capitalize())
     record = Record(name)
-    try:
+    if name.value in address_book.data:
         address_book.delete_record(record)
         save_contacts_to_file()
         return 'Contact deleted successfully'
-    except NameError as e:
-        return str(e)
+    else:
+        return f'Contact {name} does not exist'
+
+
+@input_errors
+def birthday(name:str, birthday:str):
+    name = Name(name.capitalize())
+    
+    if name.value in address_book.data:
+        try:
+            b_day = BirthDay(birthday)
+        except BirthDayError as e:
+            return str(e)
+        record:Record = address_book.data[name.value]
+        record.birthday = b_day
+        save_contacts_to_file()
+        return 'Birthday added successfully'
+    else:
+        return f'Contact {name} does not exist'
+
+
+@input_errors
+def days_to_birthday(name: str):
+    name:Name = Name(name.capitalize())
+    
+    if name.value in address_book.data:
+        record = address_book.data[name.value]
+        days = record.days_to_birthday()
+        return f"Days to birthday for {name.value}: {days}" if days is not None else f"No birthday recorded for {name.value}"
+    else:
+        return f"Contact {name.value} does not exist"
 
 
 command_dict = {
@@ -119,7 +147,9 @@ command_dict = {
     'change': [changing_contact, 'change existing phone of the contact'],
     'phone': [phone, 'show phone of existing contact'],
     'show all': [show_contacts, 'show all contacts'],
-    'del': [delete_contact, 'delete the contact']
+    'del': [delete_contact, 'delete the contact'],
+    'birthday': [birthday, 'add birthday to existing contact'],
+    'days': [days_to_birthday, 'how many days to birtday of the contact']
 }
 
 
@@ -136,7 +166,7 @@ def command_handler(user_input, command_dict):
 def main():
     print(welcome_message())
 
-    if "contacts.txt":
+    if os.path.exists("contacts.txt") and os.path.getsize("contacts.txt") > 0:
         load_contacts_from_file()
 
     while True:

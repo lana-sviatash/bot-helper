@@ -143,19 +143,29 @@ class AddressBook(UserDict):
         else:
             raise NameError(f"Record with name '{record.name.value}' not found in the address book.")
     
+    def find_in_contacts(self, text: str):
+        found_contacts = []
+        for record in self.data.values():
+            if ((record.name.value.startswith(text.capitalize()) or text in record.name.value)
+                    or any(text in phone for phone in record.phones)
+                    or (record.birthday and (text.strip() == str(record.birthday.value.year))) 
+                    if text.isdigit() else text.strip() == str(record.birthday.value).strip()):
+                found_contacts.append(record)
+        return found_contacts
+
     def iterator(self, n=5):
         index = 1
-        print_block = '\n'
+        print_block = str("{:<10s} {:<40s} {:<10s}\n".format('Contact', 'Phones', 'Birthday'))
         for record in self.data.values():
-            print_block += str("{:<10s} {:<20s} {:<12s}\n".format(record.name.value, 
-                                                                  "|".join(str(phone) for phone in record.phones), 
+            print_block += str("{:<10s} {:<40s} {:<10s}\n".format(record.name.value, 
+                                                                  ",".join(str(phone) for phone in record.phones), 
                                                                   str(record.birthday.value) if record.birthday else ""))
             if index < n:
                 index += 1
             else:
                 yield print_block
                 index = 1
-                print_block = '\n'
+                print_block = '\n' + str("{:<10s} {:<40s} {:<10s}\n".format('Contact', 'Phones', 'Birthday'))
         yield print_block
 
     def print_part_records(self, n=5):

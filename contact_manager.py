@@ -146,10 +146,10 @@ class AddressBook(UserDict):
     def find_in_contacts(self, text: str):
         found_contacts = []
         for record in self.data.values():
-            if ((record.name.value.startswith(text.capitalize()) or text in record.name.value)
+            if (text.lower() in record.name.value.lower()
                     or any(text in phone for phone in record.phones)
-                    or (record.birthday and (text.strip() == str(record.birthday.value.year))) 
-                    if text.isdigit() else text.strip() == str(record.birthday.value).strip()):
+                    or ((record.birthday and (text.strip() == str(record.birthday.value.year))) 
+                    if text.isdigit() else text.strip() == str(record.birthday.value).strip())):
                 found_contacts.append(record)
         return found_contacts
 

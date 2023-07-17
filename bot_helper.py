@@ -3,11 +3,12 @@ import functools
 import os
 import pickle
 
-from accessary import welcome_message, hello_instruction, parser_input, save_contacts_to_file, load_contacts_from_file
+from accessary import welcome_message, hello_instruction, parser_input
 from contact_manager import AddressBook, Record, Name, Phone, BirthDay, PhoneError, BirthDayError
 
 
 address_book = AddressBook()
+
 
 def save_contacts_to_file():
     with open('contacts.bin', 'wb') as file:

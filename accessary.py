@@ -1,4 +1,7 @@
 import inspect
+import os
+
+from contact_manager import AddressBook
 
 
 def welcome_message():
@@ -42,6 +45,13 @@ def parser_input(user_input: str, command_dict) -> tuple():
             arguments = user_input.replace(key, '').strip().split()
             break
     return command, arguments
+
+
+def del_file_if_empty():
+    if os.path.exists("contacts.bin") and os.path.getsize("contacts.bin") > 0:
+        address_book = AddressBook.load_contacts_from_file()
+        if not address_book.data:
+            os.remove("contacts.bin")
 
 
 if __name__=='__main__':

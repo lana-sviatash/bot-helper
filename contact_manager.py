@@ -1,5 +1,7 @@
-from collections import UserDict
 from datetime import datetime, date
+from collections import UserDict
+import os
+import pickle
 
 
 class PhoneError(Exception):
@@ -142,15 +144,30 @@ class AddressBook(UserDict):
             return f'{record.name.value}: {", ".join(phones)}'
         else:
             raise NameError(f"Record with name '{record.name.value}' not found in the address book.")
-    
+        
     def find_in_contacts(self, text: str):
         found_contacts = []
         for record in self.data.values():
-            if (text.lower() in record.name.value.lower()
-                    or any(text in phone for phone in record.phones)
-                    or ((record.birthday and (text.strip() == str(record.birthday.value.year))) 
-                    if text.isdigit() else text.strip() == str(record.birthday.value).strip())):
-                found_contacts.append(record)
+            if text.isdigit():
+                # Case: Find in phones or part of birthday
+                if any(text in phone for phone in record.phones):
+                    found_contacts.append(record)
+                if record.birthday and (text == str(record.birthday.value.year) 
+                                        or text == str(record.birthday.value.month).zfill(2) 
+                                        or text == str(record.birthday.value.day).zfill(2)):
+                    found_contacts.append(record)
+            else:
+                # Case: Find in name
+                if text.lower() in record.name.value.lower():
+                    found_contacts.append(record)
+
+                # Case: Find in birthday
+                try:
+                    b_day = datetime.strptime(text, '%Y-%m-%d')
+                    if record.birthday and b_day.date() == record.birthday.value:
+                        found_contacts.append(record)
+                except ValueError:
+                    pass
         return found_contacts
 
     def iterator(self, n=5):
@@ -174,6 +191,18 @@ class AddressBook(UserDict):
         for record in iterator_result:
             result += f'{record}'
         return result
+    
+    def save_contacts_to_file(self):
+        with open('contacts.bin', 'wb') as file:
+            pickle.dump(self, file)
+
+    @classmethod
+    def load_contacts_from_file(self):
+        if os.path.exists('contacts.bin'):
+            with open('contacts.bin', 'rb') as file:
+                loaded_address_book = pickle.load(file)
+            return loaded_address_book
+        return AddressBook()
         
     def __repr__(self):
         return "\n".join(str(record) for record in self.data.values())
